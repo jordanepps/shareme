@@ -9,16 +9,17 @@ import { client } from '../client';
 
 const Login = () => {
   const navigate = useNavigate();
-  const createOrGetUser = async (response, addUser) => {
+
+  const createOrGetUser = async (response) => {
     const decoded = jwt_decode(response.credential);
     const { name, sub: googleId, picture: imageUrl } = decoded;
-
     const doc = {
       _id: googleId,
       _type: 'user',
       userName: name,
       image: imageUrl,
     };
+    localStorage.setItem('user', JSON.stringify(doc));
 
     client.createIfNotExists(doc).then(() => {
       navigate('/', { replace: true });
