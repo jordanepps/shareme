@@ -5,11 +5,24 @@ import jwt_decode from 'jwt-decode';
 import { useNavigate } from 'react-router-dom';
 import shareVideo from '../assets/share.mp4';
 import logo from '../assets/logowhite.png';
+import { client } from '../client';
 
 const Login = () => {
+  const navigate = useNavigate();
   const createOrGetUser = async (response, addUser) => {
     const decoded = jwt_decode(response.credential);
-    console.log(decoded);
+    const { name, sub: googleId, picture: imageUrl } = decoded;
+
+    const doc = {
+      _id: googleId,
+      _type: 'user',
+      userName: name,
+      image: imageUrl,
+    };
+
+    client.createIfNotExists(doc).then(() => {
+      navigate('/', { replace: true });
+    });
   };
   return (
     <GoogleOAuthProvider clientId={process.env.REACT_APP_GOOGLE_API_TOKEN}>
@@ -33,22 +46,6 @@ const Login = () => {
                 onSuccess={(response) => createOrGetUser(response)}
                 onError={(error) => console.log(error)}
               />
-              {/* <GoogleLogin
-              clientId={process.env.REACT_APP_GOOGLE_API_TOKEN}
-              render={(renderProps) => (
-                <button
-                  type="button"
-                  className="bg-mainColor flex justify-center items-center p-3 rounded-lg cursor-pointer outline-none"
-                  onClick={renderProps.onClick}
-                  disabled={renderProps.disabled}
-                >
-                  <FcGoogle className="mr-4" /> Sign in with Google
-                </button>
-              )}
-              onSuccess={responseGoogle}
-              onFailure={responseGoogle}
-              cookiePolicy="single_host_origin"
-            /> */}
             </div>
           </div>
         </div>
